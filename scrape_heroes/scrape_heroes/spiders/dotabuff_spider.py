@@ -26,11 +26,18 @@ class DotaBuffSpider(CrawlSpider):
         """ dotabuff used JavaScript calls to generate the content dynamiclly, therefore
             we make the call using the browser and scrape the content from the broweser """
         self.browser.get(response.url)
+
         """ wait for the JavaScript to load the page """
         time.sleep(3)
 
         selector = Selector(text=self.browser.page_source)
+        best_versus = []
+        best_versus_table = selector.xpath('//*[@id="hero-versus"]/section[1]/article/table/tbody')
 
-        best_versus = selector.xpath('//*[@id="hero-versus"]/section[1]/article/table/tbody/tr[1]/td[2]/a/text()').extract()
+        for selected_hero in best_versus_table:
+            best_versus.extend(selected_hero.xpath('.//*[@class="hero-link"]/text()').extract())
+
         hero['best_versus'] = best_versus
+        hero['name'] = selector.xpath('//*[@id="content-header-primary"]/div[2]/h1/text()').extract()
+
         return hero
