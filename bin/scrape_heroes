@@ -1,0 +1,3 @@
+#!/bin/sh
+cd ../scrape_heroes
+scrapy crawl scrape_heroes -o heroes.json -t json
