@@ -15,14 +15,14 @@ class DotaBuffSpider(CrawlSpider):
     name = 'scrape_heroes'
     allowed_domains = ['dotabuff.com']
     start_urls = ['http://dotabuff.com/heroes/']
-    rules = [Rule(SgmlLinkExtractor(allow=['http://dotabuff.com/heroes/[\w+]+[-\w+]*'], 
-                                    deny=['/heroes/played', '/heroes/winning', '/heroes/impact',
-                                          '/heroes/economy', '/heroes/farm', '/heroes/damage',
-                                          '/trends', '/abilities', '/builds', '/items', '/skills'
+    rules = [Rule(SgmlLinkExtractor(allow=['http://dotabuff.com/heroes/[\w+]+[-\w+]*/matchups']),
+                  callback='parse_hero'),
+             Rule(SgmlLinkExtractor(allow=['http://dotabuff.com/heroes/[\w+]+[-\w+]*'], 
+                                    deny=['played', 'winning', 'impact',
+                                          'economy', 'farm', 'damage',
+                                          'trends', 'abilities', 'builds', 'items', 'skills'
                                           'http://dotabuff.com/heroes/[\w+]+[-\w+]*/matchups',
-                                          'http://\w+.dotabuff.com'])),
-             Rule(SgmlLinkExtractor(allow=['http://dotabuff.com/heroes/[\w+]+[-\w+]*/matchups']),
-                  callback='parse_hero')]
+                                          'http://\w+.dotabuff.com'])),]
 
     def __init__(self):
         CrawlSpider.__init__(self)
