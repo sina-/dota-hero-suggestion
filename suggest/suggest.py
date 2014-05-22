@@ -1,19 +1,24 @@
 import json
 import re
+from pprint import pprint
 
 
 class Suggest(object):
     def __init__(self):
-        """ list of dictionaries with each dictionary holding information about a hero """
-        matchups_raw = []
-        with open("../heroes_json/heroes.json", 'r') as f:
-            matchups_raw = json.load(f)
-
+        self.clear_name = lambda s: s.lower().replace('-', '')
+        """ read matchup information from file that is a list of dictionaries 
+            with each dictionary holding information about a hero """
         self.matchups = {}
-        for hero_matchup in matchups_raw:
-            self.matchups.update({hero_matchup['name'].lower(): hero_matchup['matchups']})
+        with open("../heroes_json/heroes.json", 'r') as f:
+            for hero_matchup in json.load(f):
+                name = self.clear_name(hero_matchup['name'])
+                self.matchups.update({name: hero_matchup['matchups']})
+
+    def _print_matchups(self):
+        pprint(self.matchups)
 
     def find_best_counter(self, hero_name):
+        hero_name = self.clear_name(hero_name)
         matchup = self.matchups[hero_name]
         best_counter_name = ''
         best_counter_advantage = 1000.0
