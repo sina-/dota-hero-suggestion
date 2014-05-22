@@ -18,7 +18,7 @@ class DotaBuffSpider(CrawlSpider):
     rules = [Rule(SgmlLinkExtractor(allow=['http://dotabuff.com/heroes/[\w+]+[-\w+]*'], 
                                     deny=['/heroes/played', '/heroes/winning', '/heroes/impact',
                                           '/heroes/economy', '/heroes/farm', '/heroes/damage',
-                                          '/trends', '/abilities', 'builds', 'items', 
+                                          '/trends', '/abilities', '/builds', '/items', '/skills'
                                           'http://dotabuff.com/heroes/[\w+]+[-\w+]*/matchups',
                                           'http://\w+.dotabuff.com'])),
              Rule(SgmlLinkExtractor(allow=['http://dotabuff.com/heroes/[\w+]+[-\w+]*/matchups']),
@@ -36,13 +36,13 @@ class DotaBuffSpider(CrawlSpider):
             table_data = {}
             """ notice the . in the beggining to force search in the local xpath rather than 
                 global for "hero-link" class """
-            hero_name = table_selector.xpath('.//*[@class="hero-link"]/text()').extract()
-            hero_advantage = table_selector.xpath('.//tr[*]/td[3]/text()').extract()
-            hero_win_rate = table_selector.xpath('.//tr[*]/td[4]/div[1]/text()').extract()
-            hero_number_of_matches = table_selector.xpath('.//tr[*]/td[5]/div[1]/text()').extract()
+            name = table_selector.xpath('.//*[@class="hero-link"]/text()').extract()
+            advantage = table_selector.xpath('.//tr[*]/td[3]/text()').extract()
+            win_rate = table_selector.xpath('.//tr[*]/td[4]/div[1]/text()').extract()
+            number_of_matches = table_selector.xpath('.//tr[*]/td[5]/div[1]/text()').extract()
 
-            for hn, ha, hwr, hnom in izip(hero_name, hero_advantage, hero_win_rate, hero_number_of_matches):
-                table_data[hn] = Info(ha, hwr, hnom)
+            for n, a, wr, nom in izip(name, advantage, win_rate, number_of_matches):
+                table_data[n] = Info(a, wr, nom)
 
             return table_data
 
@@ -54,7 +54,7 @@ class DotaBuffSpider(CrawlSpider):
         self.browser.get(response.url)
 
         """ wait for the JavaScript to load the page """
-        time.sleep(3)
+        time.sleep(5)
 
         selector = Selector(text=self.browser.page_source)
         hero['name'] = selector.xpath('//*[@id="content-header-primary"]/div[2]/h1/text()').extract()[0]
