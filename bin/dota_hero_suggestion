@@ -1,5 +1,6 @@
 from suggest.suggest import Suggest
 
 s = Suggest()
+s._print_matchups()
 s.find_best_counter('zeus')
 s.find_best_counter('anti-mage')
