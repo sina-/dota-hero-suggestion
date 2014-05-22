@@ -1,0 +1,5 @@
+from suggest.suggest import Suggest
+
+s = Suggest()
+s.find_best_counter('zeus')
+s.find_best_counter('anti-mage')
