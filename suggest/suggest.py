@@ -23,30 +23,38 @@ class Suggest(object):
         pprint(self.matchups)
 
     def _print_counter(self, pick, counter_pick):
-        message = "\t {cn} counters {p} with advantage of {a} and win_rate of {wr} of {nom} games"
+        message = "\t {cn}, advantage: {a}, and win_rate: {wr} of {nom} games"
         cn = counter_pick.name
         cm = counter_pick.matchup
-        print(message.format(p=pick, cn=cn, a=self.extract_float(cm.advantage)*(-1), wr=cm.win_rate, 
+        print(message.format(cn=cn, a=cm.advantage, wr=cm.win_rate, 
                              nom=cm.number_of_matches))
 
-    def _print_top_counters(self, pick, counter_picks, limit=1):
-        print("Counters to {p} are:".format(p=pick))
+    def _print_top_counters(self, pick, counter_picks, selection_type='counter', limit=5):
+        messages = {'counter': "Counters to {p} are:".format(p=pick), 
+                    'picks': "{p} counters:".format(p=pick)}
+
+        print(messages.get(selection_type))
+
         for cp in counter_picks[:limit]:
             cp = Counter(*cp)
             self._print_counter(pick, cp)
 
-    def find_top_counters(self, hero_name, limit=1):
+    def find_top_heroes(self, name, selection_type ='counter', limit=5):
         """ Searches through the matchup information and selects heroes that
             the selected hero has the highest disadvantage against """
 
-        hn = self.clear_name(hero_name)
+        hn = self.clear_name(name)
         matchup = self.matchups.get(hn)
 
         if not matchup:
-            print("Error: {hn} not found!".format(hn=hero_name))
+            print("Error: {hn} not found!".format(hn=name))
             return 
 
-        min_advantage = lambda x: self.extract_float(x[1].advantage)
-        cps = sorted(matchup.iteritems(), key=min_advantage)
+        sort_reversed = True
+        if selection_type == 'counter':
+            sort_reversed = False
 
-        self._print_top_counters(hero_name, cps, limit)
+        min_advantage = lambda x: self.extract_float(x[1].advantage)
+        cps = sorted(matchup.iteritems(), key=min_advantage, reverse=sort_reversed)
+
+        self._print_top_counters(name, cps, selection_type, limit)
