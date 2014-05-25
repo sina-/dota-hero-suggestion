@@ -46,7 +46,7 @@ class DotaBuffSpider(CrawlSpider):
         hero = HeroItem()
         hero['url'] = response.url
 
-        """ dotabuff used JavaScript calls to generate the content dynamiclly, therefore
+        """ dotabuff uses JavaScript calls to generate the content dynamiclly, therefore
             we make the call using the browser and scrape the content from the broweser """
         self.browser.get(response.url)
 

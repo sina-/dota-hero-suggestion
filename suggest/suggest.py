@@ -23,21 +23,30 @@ class Suggest(object):
         pprint(self.matchups)
 
     def _print_counter(self, pick, counter_pick):
-        message = "Best counter to {p} is {cn} with advantage of {a} and win_rate of {wr} of {nom} games"
+        message = "\t {cn} counters {p} with advantage of {a} and win_rate of {wr} of {nom} games"
         cn = counter_pick.name
         cm = counter_pick.matchup
-        print(message.format(p=pick, cn=cn, a=self.extract_float(cm.advantage)*(-1), wr=cm.win_rate, nom=cm.number_of_matches))
+        print(message.format(p=pick, cn=cn, a=self.extract_float(cm.advantage)*(-1), wr=cm.win_rate, 
+                             nom=cm.number_of_matches))
 
-    def find_best_counter(self, hero_name):
-        """ Searches through all the matchup information of every hero and selects the one that
-            the current hero has the highest disadvantage against """
+    def _print_top_counters(self, pick, counter_picks, limit=1):
+        print("Counters to {p} are:".format(p=pick))
+        for cp in counter_picks[:limit]:
+            cp = Counter(*cp)
+            self._print_counter(pick, cp)
 
-        hero_name = self.clear_name(hero_name)
-        """ Dictionary of {'hero_name': Matchup} """
-        matchup = self.matchups[hero_name]
+    def find_top_counters(self, hero_name, limit=1):
+        """ Searches through the matchup information and selects heroes that
+            the selected hero has the highest disadvantage against """
+
+        hn = self.clear_name(hero_name)
+        matchup = self.matchups.get(hn)
+
+        if not matchup:
+            print("Error: {hn} not found!".format(hn=hero_name))
+            return 
 
         min_advantage = lambda x: self.extract_float(x[1].advantage)
-        counter_pick = Counter(*min(matchup.iteritems(), key=min_advantage))
+        cps = sorted(matchup.iteritems(), key=min_advantage)
 
-        self._print_counter(hero_name, counter_pick)
-
+        self._print_top_counters(hero_name, cps, limit)

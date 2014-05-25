@@ -2,6 +2,7 @@ from suggest.suggest import Suggest
 
 s = Suggest()
 #s._print_matchups()
-s.find_best_counter('zeus')
-s.find_best_counter('anti-mage')
-
+s.find_top_counters('ogre-magi', 5)
+s.find_top_counters('phantom-lancer', 5)
+s.find_top_counters('slark', 5)
+s.find_top_counters('lark', 5)
