@@ -4,16 +4,15 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description="Suggest dota hero picks")
-    parser.add_argument('command', type=str, default='counter', 
-        help="""Find counter picks or the heroes the pick counters""", 
-        choices=['best', 'worst'])
-    parser.add_argument('--hero', type=str, default='anti-mage')
+    parser.add_argument('command', type=str, choices=['best', 'worst'],
+        help="""Find counter picks or the heroes the pick counters""")
+    parser.add_argument('-p', '--pick', action='append', default=[])
     parser.add_argument('-l', '--limit', type=int, default=5)
 
     args = parser.parse_args()
 
     s = Suggest()
-    s.find_top_heroes(name=args.hero, selection_type=args.command, 
+    s.suggest_counter(picks=args.pick, order=args.command, 
         limit=args.limit)
 
 if __name__ == "__main__":
