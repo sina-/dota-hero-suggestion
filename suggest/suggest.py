@@ -1,7 +1,9 @@
 from pprint import pprint
 from utils.utils import Matchup, Counter
+from itertools import imap
 import json
 import re
+import operator
 
 
 class Suggest(object):
@@ -9,6 +11,7 @@ class Suggest(object):
         self.clear_name = lambda s: s.lower().replace('-', '').replace(' ', '')
         self.extract_float = lambda s: float(re.match("\-?\d+.\d+", s).group())
         self.matchups = {}
+        self.name_map = {}
 
         """ read matchup information from file that is a list of dictionaries
             with each dictionary holding information about a hero matchups
@@ -17,44 +20,65 @@ class Suggest(object):
         with open("../heroes_json/heroes.json", 'r') as f:
             for hero_matchup in json.load(f):
                 name = self.clear_name(hero_matchup['name'])
-                matchups = {n: Matchup(*m) for n, m in
+                self.name_map[name] = hero_matchup['name']
+                matchups = {self.clear_name(n): Matchup(*m) for n, m in
                             hero_matchup['matchups'].iteritems()}
                 self.matchups.update({name: matchups})
+
+        """ verify content by comparing the number of matchups in
+            consecutive hero matchups"""
+        prev_count = None
+        for n, m in self.matchups.iteritems():
+            prev_count = len(m) if not prev_count else prev_count
+            if prev_count != len(m):
+                print("Error: missing matchup information for {n}".format(n=n))
 
     def _print_matchups(self):
         pprint(self.matchups)
 
-    def _print_counter(self, pick, counter_pick):
+    def _print_counter(self, counter_pick):
         message = "\t {cn}, advantage: {a}, and win_rate: {wr} of {nom} games"
         cn = counter_pick.name
         cm = counter_pick.matchup
         print(message.format(cn=cn, a=cm.advantage, wr=cm.win_rate,
                              nom=cm.number_of_matches))
 
-    def _print_top_counters(self, pick, counter_picks,
-                            selection_type, limit=5):
-        print("{p} is {st} against:".format(p=pick, st=selection_type))
+    def _print_suggested_counter(self, picks, counter_picks,
+                                 order, limit=5):
+        print("{ps} is {st} against:".format(ps=picks, st=order))
 
         for cp in counter_picks[:limit]:
-            cp = Counter(*cp)
-            self._print_counter(pick, cp)
+            print("\t {cp}, advantage: {a}".format(cp=self.name_map[cp[0]],
+                                                   a=cp[1]))
 
-    def find_top_heroes(self, name, selection_type, limit=5):
-        """ Searches through the matchup information and selects heroes that
-            the selected hero has the highest, or lowest, advantage against """
+    def suggest_counter(self, picks, order, limit=5):
+        """ Searche through the matchup information and select hero
+            that the selected hero, or heroes, has the highest, or lowest,
+            advantage against """
 
-        hn = self.clear_name(name)
-        matchup = self.matchups.get(hn)
+        ps = imap(self.clear_name, picks)
 
-        if not matchup:
-            print("Error: {hn} not found!".format(hn=name))
-            return
+        """ Dictionary with {'hero_name': aggregated_advantage}
+            where aggregated_advantage is the sum of advantages from matchup
+            of given list of heroes """
+        total_ad = {}
+        for p in ps:
+            m = self.matchups.get(p)
+            """ delete the picks from result to aviod for example suggesting
+                slark as best counter for slark+tiny """
+            for pp in picks:
+                pp = self.clear_name(pp)
+                if pp in m.keys():
+                    m.pop(pp)
+            for k, v in m.iteritems():
+                temp_ad = self.extract_float(v.advantage)+total_ad.get(k, 0.0)
+                total_ad.update({k: temp_ad})
 
         sort_reversed = True
-        if selection_type == 'best':
+        if order == 'worst':
             sort_reversed = False
 
-        advantage = lambda x: self.extract_float(x[1].advantage)
-        cps = sorted(matchup.iteritems(), key=advantage, reverse=sort_reversed)
+        cps = sorted(total_ad.iteritems(), key=operator.itemgetter(1),
+                     reverse=sort_reversed)
 
-        self._print_top_counters(name, cps, selection_type, limit)
+        self._print_suggested_counter('+'.join(picks), cps, order, limit)
