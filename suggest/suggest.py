@@ -32,19 +32,16 @@ class Suggest(object):
                              nom=cm.number_of_matches))
 
     def _print_top_counters(self, pick, counter_picks,
-                            selection_type='counter', limit=5):
-        messages = {'counter': "Counters to {p} are:".format(p=pick),
-                    'picks': "{p} counters:".format(p=pick)}
-
-        print(messages.get(selection_type))
+                            selection_type, limit=5):
+        print("{p} is {st} against:".format(p=pick, st=selection_type))
 
         for cp in counter_picks[:limit]:
             cp = Counter(*cp)
             self._print_counter(pick, cp)
 
-    def find_top_heroes(self, name, selection_type='counter', limit=5):
+    def find_top_heroes(self, name, selection_type, limit=5):
         """ Searches through the matchup information and selects heroes that
-            the selected hero has the highest disadvantage against """
+            the selected hero has the highest, or lowest, advantage against """
 
         hn = self.clear_name(name)
         matchup = self.matchups.get(hn)
@@ -54,7 +51,7 @@ class Suggest(object):
             return
 
         sort_reversed = True
-        if selection_type == 'counter':
+        if selection_type == 'best':
             sort_reversed = False
 
         advantage = lambda x: self.extract_float(x[1].advantage)

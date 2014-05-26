@@ -6,7 +6,7 @@ def main():
     parser = argparse.ArgumentParser(description="Suggest dota hero picks")
     parser.add_argument('command', type=str, default='counter', 
         help="""Find counter picks or the heroes the pick counters""", 
-        choices=['counter', 'picks'])
+        choices=['best', 'worst'])
     parser.add_argument('--hero', type=str, default='anti-mage')
     parser.add_argument('-l', '--limit', type=int, default=5)
 
