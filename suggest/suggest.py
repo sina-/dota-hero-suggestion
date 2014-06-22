@@ -67,12 +67,10 @@ class Suggest(object):
             """ delete the picks from result to aviod for example suggesting
                 slark as best counter for slark+tiny """
             for pp in picks:
-                pp = self.clear_name(pp)
-                if pp in m.keys():
-                    m.pop(pp)
+                m.pop(self.clear_name(pp), None)
             for k, v in m.iteritems():
-                temp_ad = self.extract_float(v.advantage)+total_ad.get(k, 0.0)
-                total_ad.update({k: temp_ad})
+                ad = self.extract_float(v.advantage)+total_ad.get(k, 0.0)
+                total_ad.update({k: ad})
 
         sort_reversed = True
         if order == 'worst':
